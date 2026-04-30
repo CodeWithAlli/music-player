@@ -29,26 +29,10 @@ let curr_track = new Audio();
 // 🔹 LISTA DE TRACKS
 // =======================
 let track_list = [
-  {
-    name: "Fairytale",
-    path: "assets/audio01.mp3",
-    image: "assets/img/img01.jpg"
-  },
-  {
-    name: "Francés Limón",
-    path: "assets/audio02.mp3",
-    image: "assets/img/img02.jpg"
-  },
-  {
-    name: "Me and Your Mama",
-    path: "assets/audio03.mp3",
-    image: "assets/img/img03.jpg"
-  },
-  {
-    name: "Love Me",
-    path: "assets/audio04.mp3",
-    image: "assets/img/img04.jpg"
-  }
+  { name: "Fairytale", path: "assets/audio01.mp3", image: "assets/img/img01.jpg" },
+  { name: "Francés Limón", path: "assets/audio02.mp3", image: "assets/img/img02.jpg" },
+  { name: "Me and Your Mama", path: "assets/audio03.mp3", image: "assets/img/img03.jpg" },
+  { name: "Love Me", path: "assets/audio04.mp3", image: "assets/img/img04.jpg" }
 ];
 
 // =======================
@@ -99,13 +83,12 @@ function loadTrack() {
   track_artist.textContent = "Para ti ❤️";
 
   updateActive();
-
   updateTimer = setInterval(seekUpdate, 500);
 
   curr_track.onended = nextTrack;
 
-  // 🎧 MEDIA SESSION (AQUÍ ES DONDE VA)
-  if ('mediaSession' in navigator) {
+  // 🎧 MEDIA SESSION
+  if ("mediaSession" in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: currentTrack.name,
       artist: "Para ti ❤️",
@@ -118,10 +101,10 @@ function loadTrack() {
       ]
     });
 
-    navigator.mediaSession.setActionHandler('play', playTrack);
-    navigator.mediaSession.setActionHandler('pause', pauseTrack);
-    navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
-    navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
+    navigator.mediaSession.setActionHandler("play", playTrack);
+    navigator.mediaSession.setActionHandler("pause", pauseTrack);
+    navigator.mediaSession.setActionHandler("previoustrack", prevTrack);
+    navigator.mediaSession.setActionHandler("nexttrack", nextTrack);
   }
 }
 
@@ -139,17 +122,27 @@ function updateActive() {
 // 🔹 PLAY / PAUSE
 // =======================
 function playTrack() {
-  curr_track.play();
+  curr_track.play().catch(() => {}); // 👈 evita error en móviles
   isPlaying = true;
+
   playpause_btn.innerHTML =
     '<i class="fa fa-pause-circle fa-5x"></i>';
+
+  if ("mediaSession" in navigator) {
+    navigator.mediaSession.playbackState = "playing";
+  }
 }
 
 function pauseTrack() {
   curr_track.pause();
   isPlaying = false;
+
   playpause_btn.innerHTML =
     '<i class="fa fa-play-circle fa-5x"></i>';
+
+  if ("mediaSession" in navigator) {
+    navigator.mediaSession.playbackState = "paused";
+  }
 }
 
 function playpauseTrack() {
@@ -227,6 +220,9 @@ function resetValues() {
 renderTrackList();
 loadTrack();
 
+// 🔧 Service Worker (mejor forma)
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js");
+  });
 }
