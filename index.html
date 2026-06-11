@@ -1,71 +1,159 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Player ❤️</title>
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
-
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#111111">
-
-  <!-- PWA mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-
-  <!-- icon -->
-  <link rel="icon" href="assets/img/icon-192.png">
+  <title>Player ❤️</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<div class="container">
+  <!-- Fondo de color ambiente dinámico -->
+  <div class="ambient-bg" id="ambientBg"></div>
 
-  <div class="sidebar">
-    <h3>Playlist</h3>
-    <ul id="track-list"></ul>
+  <div class="app-container">
+
+    <!-- SIDEBAR PLAYLIST -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-title">Playlist</span>
+        <button class="sidebar-close" id="sidebarClose">✕</button>
+      </div>
+      <ul class="track-list" id="trackList"></ul>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- PLAYER PRINCIPAL -->
+    <main class="player-area">
+
+      <!-- TOP BAR -->
+      <header class="top-bar">
+        <button class="icon-btn" id="menuBtn" aria-label="Playlist">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="16" y2="12"/>
+            <line x1="3" y1="18" x2="11" y2="18"/>
+          </svg>
+        </button>
+        <span class="now-label">REPRODUCIENDO</span>
+        <button class="icon-btn heart-btn" id="heartBtn" aria-label="Me gusta">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" id="heartIcon">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </button>
+      </header>
+
+      <!-- VINILO / ARTWORK -->
+      <div class="artwork-wrapper">
+        <div class="vinyl-outer" id="vinylOuter">
+          <div class="vinyl-disc" id="vinylDisc">
+            <img src="" id="vinylImg" class="vinyl-img" alt="portada">
+            <div class="vinyl-center-ring"></div>
+            <div class="vinyl-center-dot"></div>
+          </div>
+        </div>
+        <div class="artwork-glow" id="artworkGlow"></div>
+      </div>
+
+      <!-- INFO CANCIÓN -->
+      <section class="track-info">
+        <h1 class="track-name" id="trackName">Cargando...</h1>
+        <p class="track-artist" id="trackArtist">Para ti ❤️</p>
+      </section>
+
+      <!-- VISUALIZADOR CSS (barras animadas) -->
+      <div class="visualizer" id="visualizer">
+        <div class="bar" style="--delay:0s; --h:40%"></div>
+        <div class="bar" style="--delay:0.1s; --h:70%"></div>
+        <div class="bar" style="--delay:0.2s; --h:55%"></div>
+        <div class="bar" style="--delay:0.15s; --h:85%"></div>
+        <div class="bar" style="--delay:0.05s; --h:60%"></div>
+        <div class="bar" style="--delay:0.25s; --h:45%"></div>
+        <div class="bar" style="--delay:0.1s; --h:75%"></div>
+        <div class="bar" style="--delay:0.3s; --h:50%"></div>
+        <div class="bar" style="--delay:0.08s; --h:90%"></div>
+        <div class="bar" style="--delay:0.18s; --h:65%"></div>
+        <div class="bar" style="--delay:0.22s; --h:80%"></div>
+        <div class="bar" style="--delay:0.12s; --h:55%"></div>
+        <div class="bar" style="--delay:0.28s; --h:70%"></div>
+        <div class="bar" style="--delay:0.06s; --h:40%"></div>
+        <div class="bar" style="--delay:0.16s; --h:60%"></div>
+      </div>
+
+      <!-- BARRA DE PROGRESO -->
+      <div class="progress-section">
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+          <input type="range" min="0" max="100" value="0"
+                 class="progress-range" id="seekSlider" aria-label="Progreso">
+        </div>
+        <div class="time-row">
+          <span id="currentTime">0:00</span>
+          <span id="totalDuration">0:00</span>
+        </div>
+      </div>
+
+      <!-- CONTROLES -->
+      <div class="controls-row">
+        <button class="ctrl-side shuffle-btn" id="shuffleBtn" title="Aleatorio">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/>
+            <polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/>
+          </svg>
+        </button>
+
+        <button class="ctrl-main" onclick="prevTrack()" aria-label="Anterior">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
+          </svg>
+        </button>
+
+        <button class="play-btn" id="playBtn" onclick="playpauseTrack()" aria-label="Play/Pausa">
+          <span id="playIcon">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </span>
+        </button>
+
+        <button class="ctrl-main" onclick="nextTrack()" aria-label="Siguiente">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M6 18 14.5 12 6 6v12zm2-8.14L11.03 12 8 14.14V9.86zM16 6h2v12h-2z"/>
+          </svg>
+        </button>
+
+        <button class="ctrl-side repeat-btn" id="repeatBtn" title="Repetir">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="repeatIcon">
+            <polyline points="17 1 21 5 17 9"/>
+            <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
+            <polyline points="7 23 3 19 7 15"/>
+            <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- VOLUMEN -->
+      <div class="volume-row">
+        <button class="mute-btn" id="muteBtn" aria-label="Silenciar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" id="volumeIcon">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+          </svg>
+        </button>
+        <div class="volume-track">
+          <div class="volume-fill" id="volumeFill" style="width:80%"></div>
+          <input type="range" min="0" max="100" value="80"
+                 class="volume-range" id="volumeSlider" aria-label="Volumen">
+        </div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="opacity:.5">
+          <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+        </svg>
+      </div>
+
+    </main>
   </div>
 
-  <div class="player">
-
-    <div class="details">
-      <div class="now-playing">ALLISON Y CARLOS</div>
-      <div class="track-name">❤️❤️❤️❤️❤️❤️❤️</div>
-      <div class="track-artist">- - - - - Para ti - - - - -</div>
-    </div>
-
-    <div class="buttons">
-      <div class="prev-track" onclick="prevTrack()">
-        <i class="fa fa-step-backward fa-2x"></i>
-      </div>
-
-      <div class="playpause-track" onclick="playpauseTrack()">
-        <i class="fa fa-play-circle fa-5x"></i>
-      </div>
-
-      <div class="next-track" onclick="nextTrack()">
-        <i class="fa fa-step-forward fa-2x"></i>
-      </div>
-    </div>
-
-    <div class="slider_container">
-      <div class="current-time">00:00</div>
-      <input type="range" min="0" max="100" value="0" class="seek_slider" onchange="seekTo()">
-      <div class="total-duration">00:00</div>
-    </div>
-
-    <!-- 🔊 volumen -->
-    <div class="slider_container">
-      <input type="range" min="0" max="100" value="80" class="volume_slider" onchange="setVolume()">
-    </div>
-
-  </div>
-
-</div>
-
-<script src="main.js"></script>
-
+  <script src="main.js"></script>
 </body>
 </html>
